@@ -89,20 +89,35 @@ webSocket.on('request',(req)=>{
                 }
             break
 
+            case "call_ended":
+                const userToEndCall = findUser(data.target);
+                if (userToEndCall) {
+                  userToEndCall.conn.send(
+                    JSON.stringify({
+                      type: "call_ended",
+                      name: data.name,
+                      data: "Call ended by peer",
+                    })
+                  );
+                }
+        break;
+
+      default:
+        console.log(`Unknown message type: ${data.type}`);
 
         }
 
     })
     
-    connection.on('close', () =>{
-        users.forEach( user => {
-            if(user.conn === connection){
-                users.splice(users.indexOf(user),1)
-            }
+   
+    connection.on("close", () => {
+        users.forEach((user) => {
+          if (user.conn === connection) {
+            users.splice(users.indexOf(user), 1);
+            console.log(`User ${user.name} disconnected`);
+          }
         })
-    })
-
-
+      })
 
 
 
@@ -234,6 +249,19 @@ webSocket.on("request", (req) => {
                 sdpMid: data.data.sdpMid,
                 sdpCandidate: data.data.sdpCandidate,
               },
+            })
+          );
+        }
+        break;
+        
+        case "call_ended":
+        const userToEndCall = findUser(data.target);
+        if (userToEndCall) {
+          userToEndCall.conn.send(
+            JSON.stringify({
+              type: "call_ended",
+              name: data.name,
+              data: "Call ended by peer",
             })
           );
         }
